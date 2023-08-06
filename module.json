@@ -15,7 +15,7 @@
       "minimum": "0.6.4",
       "verified": "11"
     },
-    "scripts": [
+    "esmodules": [
         "./src/navigation-presets.js"
       ],
     "styles": [
