@@ -2,6 +2,7 @@ export const modName = 'Navigation Presets';
 const modId = 'navigation-presets';
 const mainSettingKey = 'npresets';
 const activePresetKey = 'active-preset';
+const currentNavIdsKey = 'current-navids';
 const playerEnabledKey = 'player-enabled';
 const truncateNameKey = 'truncate-name';
 const dataPresetId = 'data-npreset-id';
@@ -579,6 +580,12 @@ export class Settings {
       type: String,
       default: null
     });
+    game.settings.register(modId, currentNavIdsKey, {
+      scope: 'world',
+      config: false,
+      type: Array,
+      default: []
+    });
     game.settings.register(modId, playerEnabledKey, {
       scope: 'world',
       config: true,
@@ -676,8 +683,14 @@ Hooks.once('init', async function() {
   Hooks.once('renderSceneNavigation', function() {
     Hooks.call('renderSceneNavigationPresets');
   })
-  Hooks.on('renderSceneNavigationPresets', async function() {
+  Hooks.once('renderSceneNavigationPresets', async function() {
     if (game.user.isGM || game.settings.get(modId, playerEnabledKey)) {
+
+      if (game.settings.get(modId, currentNavIdsKey).length === 0) {
+        logger('no currentNavIdsKey set, grabbing');
+        game.settings.set(modId, currentNavIdsKey, getVisibleNavIds())
+      }
+
       if (Object.keys(Settings.getPresets()).length === 0) {
         logger('no presets found, calling initPresets()');
         await initPresets();
