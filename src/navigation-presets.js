@@ -156,16 +156,20 @@ async function initPresets() {
 }
 
 function clearExistingElements() {
+  logger('clearing existing elements');
   let createButton = document.querySelector('a.create-preset');
   let navMenu = document.querySelector('nav#navpresets-menu');
   let activePreset = document.querySelector('a.scene-presets');
   if (createButton != null) {
+    logger('clearing create button');
     createButton.parentElement.removeChild(createButton);
   }
   if (navMenu != null) {
+    logger('clearing nav menu', {navScenes: getNavScenes()});
     navMenu.parentElement.removeChild(navMenu);
   }
   if (activePreset != null) {
+    logger('clearing active preset');
     activePreset.parentElement.removeChild(activePreset);
   }
 }
@@ -205,6 +209,7 @@ async function filterNavItemsToActivePreset(activePreset) {
 }
 
 function setupPresets() {
+  logger('setting up presets');
   Settings.checkActivePresetExists();
   let allPresets = Settings.getPresets();
   let activePreset = allPresets[Settings.getActivePresetId()];
@@ -668,7 +673,7 @@ Hooks.once('init', async function() {
     CONFIG.ui.nav = SceneNavigationPresets;
   })
   Settings.registerSettings();
-  Hooks.on('renderSceneNavigation', function() {
+  Hooks.once('renderSceneNavigation', function() {
     Hooks.call('renderSceneNavigationPresets');
   })
   Hooks.on('renderSceneNavigationPresets', async function() {
