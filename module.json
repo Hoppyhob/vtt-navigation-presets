@@ -22,6 +22,7 @@
       "./styles/navigation-presets.css"
     ],
     "url": "https://github.com/BradleyStaples/vtt-navigation-presets",
+    "manifest": "https://raw.githubusercontent.com/BradleyStaples/vtt-navigation-presets/master/module.json",
     "readme": "https://github.com/BradleyStaples/vtt-navigation-presets/blob/main/README.md",
     "download": "http://github.com/BradleyStaples/vtt-navigation-presets/archive/master.zip"
   }
