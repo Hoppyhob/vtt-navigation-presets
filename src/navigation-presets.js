@@ -1,6 +1,6 @@
 export const modName = 'Navigation Presets';
 const modId = 'navigation-presets';
-const settingId = 'npresets';
+const mainSettingKey = 'npresets';
 const activePresetKey = 'active-preset';
 const playerEnabledKey = 'player-enabled';
 const truncateNameKey = 'truncate-name';
@@ -34,6 +34,7 @@ function getVisibleNavIds() {
   for (let nav of document.querySelectorAll('li.nav-item.scene')) {
     sceneIds.push(nav.getAttribute('data-scene-id'));
   }
+  logger('getVisibleNavIds found the following scenes', sceneIds);
   return sceneIds;
 }
 
@@ -115,9 +116,6 @@ export class NavigationPreset {
   set scenes(scenes) {this.sceneList = scenes;}
   get active() {return this.isActive};
   set active(a) {this.isActive = a;}
-  addScene(scene) {
-    this.scenes.push(scene);
-  }
 }
 
 async function initPresets() {
@@ -136,14 +134,14 @@ async function initPresets() {
       allPresets,
       sceneIds,
     });
-    await game.settings.set(modId, settingId, allPresets);
+    await game.settings.set(modId, mainSettingKey, allPresets);
   } else {
     Hooks.once('ready', async function() {
       logger('initPresets() called after Hooks.once.ready', {
         allPresets,
         sceneIds,
       });
-      await game.settings.set(modId, settingId, allPresets);
+      await game.settings.set(modId, mainSettingKey, allPresets);
     });
   }
 }
@@ -177,10 +175,10 @@ async function assignNewNavItemsToDefault(existingNavItems) {
   }
   allPresets['default'].sceneList = allPresets['default'].sceneList.concat(unassigned);
   if (game.ready)
-    await game.settings.set(modId,settingId,allPresets);
+    await game.settings.set(modId,mainSettingKey,allPresets);
   else
     Hooks.once('ready',async function() {
-      await game.settings.set(modId,settingId,allPresets);
+      await game.settings.set(modId,mainSettingKey,allPresets);
     });
 }
 
@@ -414,7 +412,7 @@ class NavigationPresetEditConfig extends FormApplication {
   }
 
   getGroupedPacks() {
-    let allPresets = game.settings.get(modId, settingId);
+    let allPresets = game.settings.get(modId, mainSettingKey);
     let assigned = {};
     let unassigned = {};
     let visibleNavIcons = getVisibleNavIds();
@@ -422,7 +420,7 @@ class NavigationPresetEditConfig extends FormApplication {
       if (key != 'default') {
         for (let a of allPresets[key].sceneList) {
           if (visibleNavIcons.includes(a)) {
-            assigned[a]=game.scenes.get(a);
+            assigned[a] = game.scenes.get(a);
           }
         }
       }
@@ -432,7 +430,7 @@ class NavigationPresetEditConfig extends FormApplication {
         unassigned[scene] = game.scenes.get(scene);
       }
     }
-    return [assigned,unassigned];
+    return {assigned, unassigned};
   }
 
   /** @override */
@@ -441,8 +439,8 @@ class NavigationPresetEditConfig extends FormApplication {
     return {
       preset: this.object,
       defaultFolder: this.object._id === 'default',
-      ascenes: alphaSortScenes(Object.values(allScenes[0])),
-      uscenes: alphaSortScenes(Object.values(allScenes[1])),
+      ascenes: alphaSortScenes(Object.values(allScenes.assigned)),
+      uscenes: alphaSortScenes(Object.values(allScenes.unassigned)),
       submitText: this.object.colorText.length > 1 ? 'Update Preset' : 'Create Preset',
       deleteText: (this.object.colorText.length > 1 && this.object._id != 'default') ? 'Delete Preset' : null
     };
@@ -488,7 +486,7 @@ class NavigationPresetEditConfig extends FormApplication {
         }
       }).render(true);
     } else {
-      await updatePresets(scenesToAdd,scenesToRemove, this.object);
+      await updatePresets(scenesToAdd, scenesToRemove, this.object);
     }
   }
 }
@@ -535,7 +533,7 @@ async function updatePresets(scenesToAdd, scenesToRemove, preset) {
   allPresets[presetId].titleText = preset.titleText;
   allPresets[presetId].colorText = preset.colorText;
 
-  await game.settings.set(modId,settingId,allPresets);
+  await game.settings.set(modId,mainSettingKey,allPresets);
   refreshPresets();
 }
 
@@ -545,7 +543,7 @@ async function deletePreset(presetId) {
     allPresets['default'].sceneList.push(scene);
   }
   delete allPresets[presetId];
-  await game.settings.set(modId, settingId,allPresets);
+  await game.settings.set(modId, mainSettingKey,allPresets);
   refreshPresets();
 }
 
@@ -554,7 +552,7 @@ async function deletePreset(presetId) {
 // folder.entities = scenes
 export class Settings {
   static registerSettings() {
-    game.settings.register(modId, settingId, {
+    game.settings.register(modId, mainSettingKey, {
       scope: 'world',
       config: false,
       type: Object,
@@ -583,16 +581,11 @@ export class Settings {
       hint: 'If disabled, scene name will not be truncated to 32 characters'
     });
   }
-  static updatePreset(presetData) {
-    let existingPresets = game.settings.get(modId, settingId);
-    existingPresets[presetData._id] = presetData;
-    game.settings.set(modId, settingId, existingPresets);
-  }
   static updatePresets(presets) {
-    game.settings.set(modId, settingId, presets);
+    game.settings.set(modId, mainSettingKey, presets);
   }
   static getPresets() {
-    let allPresets = game.settings.get(modId, settingId);
+    let allPresets = game.settings.get(modId, mainSettingKey);
     if (game.user.isGM) {
       return allPresets;
     } else {
@@ -607,9 +600,12 @@ export class Settings {
       }, {});
     }
   }
+  static getDefaultPreset() {
+    return Object.keys(Settings.getPresets())[0];
+  }
   static getActivePresetId() {
     let result = game.settings.get(modId, activePresetKey);
-    return result ? result : Object.keys(Settings.getPresets())[0];
+    return result ? result : Settings.getDefaultPreset();
   }
   static async activatePreset(newPresetId) {
     await game.settings.set(modId, activePresetKey, newPresetId);
@@ -619,7 +615,7 @@ export class Settings {
     let activePreset = game.settings.get(modId, activePresetKey);
     if (!Object.keys(allPresets).includes(activePreset)) {
       logger('active preset not longer exists, switching to default');
-      await game.settings.set(modId, activePresetKey, Object.keys(Settings.getPresets())[0]);
+      await game.settings.set(modId, activePresetKey, Settings.getDefaultPreset());
     }
   }
 }
@@ -667,15 +663,14 @@ Hooks.once('init',async function() {
     Hooks.call('renderSceneNavigationPresets');
   })
   Hooks.on('renderSceneNavigationPresets', async function() {
-    logger('rendering via renderSceneNavigationPresets hook', {
-      isGM: game.user.isGM,
-      playerEnabled: game.settings.get(modId, playerEnabledKey)
-    });
     if (game.user.isGM || game.settings.get(modId, playerEnabledKey)) {
       if (Object.keys(Settings.getPresets()).length === 0) {
         logger('no presets found, calling initPresets');
         await initPresets();
       }
+      logger('presets found', {
+        presets: Settings.getPresets()
+      });
       setupPresets();
       addEventListeners();
     }
