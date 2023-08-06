@@ -229,17 +229,17 @@ function setupPresets() {
   for (let preset of alphaSortPresets(allPresets)) {
     if (preset._id === defaultPreset && preset.sceneList?.length === 0) continue;
     if (preset._id !== activePreset._id) {
-      let preset1 = document.createElement('li');
-      preset1.classList.add('nav-preset');
+      let li = document.createElement('li');
+      li.classList.add('nav-preset');
       if (presetHasActiveScene(preset)) {
         let bullseye = document.createElement('i');
         bullseye.classList.add('fas', 'fa-bullseye');
-        preset1.innerHTML = bullseye.outerHTML+preset.titleText;
+        li.innerHTML = bullseye.outerHTML+preset.titleText;
       } else {
-        preset1.innerHTML = preset.titleText;
+        li.innerHTML = preset.titleText;
       }
-      preset1.style.backgroundColor = preset.colorText;
-      preset1.setAttribute(dataPresetId, preset._id);
+      li.style.backgroundColor = preset.colorText;
+      li.setAttribute(dataPresetId, preset._id);
 
       // player icons
       let playerIcons = generatePlayerIcons(preset);
@@ -249,9 +249,9 @@ function setupPresets() {
         for (let player of playerIcons) {
           playerList.appendChild(player);
         }
-        preset1.appendChild(playerList);
+        li.appendChild(playerList);
       }
-      contextItems.appendChild(preset1);
+      contextItems.appendChild(li);
     }
   }
   presetMenu.appendChild(contextItems);
