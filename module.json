@@ -1,16 +1,27 @@
 {
-    "name": "navigation-presets",
+    "id": "navigation-presets",
     "title": "Navigation Presets",
     "description": "Configurable presets for navigation items",
-    "author": "Erceron",
-    "version": "1.1.0",
-    "minimumCoreVersion": "0.6.5",
-    "compatibleCoreVersion":"0.8.9",
-    "esmodules": [
-        "./navigation-presets.js"
+    "authors": [
+      {
+        "name": "Erceron"
+      },
+      {
+        "name": "Bradley Staples"
+      }
+    ],
+    "version": "1.2.0",
+    "compatibility": {
+      "minimum": "0.6.4",
+      "verified": "11"
+    },
+    "scripts": [
+        "./src/navigation-presets.js"
       ],
-    "styles": ["./styles.css"],
-    "url": "https://github.com/earlSt1/vtt-navigation-presets",
-    "manifest": "https://raw.githubusercontent.com/earlSt1/vtt-navigation-presets/master/module.json",
-    "download": "https://github.com/earlSt1/vtt-navigation-presets/releases/download/1.1.0/1.1.0.zip"
+    "styles": [
+      "./styles/navigation-presets.css"
+    ],
+    "url": "https://github.com/BradleyStaples/vtt-navigation-presets",
+    "readme": "https://github.com/BradleyStaples/vtt-navigation-presets/blob/main/README.md",
+    "download": "http://github.com/BradleyStaples/vtt-navigation-presets/archive/master.zip"
   }
