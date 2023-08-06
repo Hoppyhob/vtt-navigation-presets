@@ -16,8 +16,8 @@
       "verified": "11"
     },
     "esmodules": [
-        "./src/navigation-presets.js"
-      ],
+      "./src/navigation-presets.js"
+    ],
     "styles": [
       "./styles/navigation-presets.css"
     ],
