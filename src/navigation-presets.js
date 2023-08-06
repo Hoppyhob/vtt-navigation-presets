@@ -10,7 +10,7 @@ function isEventRightClick(ev) {
   return false;
 }
 
-function generateRandomPresetName() {
+function generateRandomPresetNa-edime() {
   return Math.random().toString(36).replace('0.', 'npreset_' || '');
 }
 
@@ -384,7 +384,7 @@ class NavigationPresetEditConfig extends FormApplication {
   static get defaultOptions() {
     const options = super.defaultOptions;
     options.id = 'navigation-preset-edit';
-    options.template = 'modIdules/navigation-presets/templates/navigation-preset-edit.html';
+    options.template = modId + '/navigation-presets/templates/navigation-preset-edit.html';
     options.width = 500;
     return options;
   }
