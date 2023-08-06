@@ -5,6 +5,7 @@ const activePresetKey = 'active-preset';
 const playerEnabledKey = 'player-enabled';
 const truncateNameKey = 'truncate-name';
 const dataPresetId = 'data-npreset-id';
+const defaultPreset = 'default';
 
 function logger(message, data) {
   console.log(`${modName} | ${message}`, data);
@@ -12,9 +13,9 @@ function logger(message, data) {
 
 function isEventRightClick(ev) {
   if ('which' in ev)
-    return ev.which == 3;
+    return ev.which === 3;
   else if ('button' in ev)
-    return ev.button == 2;
+    return ev.button === 2;
   return false;
 }
 
@@ -29,10 +30,18 @@ Handlebars.registerHelper('ifInPreset', function(presetId, scenes, options) {
   return options.inverse(this);
 });
 
+function getNavScenes() {
+  return document.querySelectorAll('li.nav-item.scene');
+}
+
+function getSceneId(node) {
+  return node.getAttribute('data-scene-id');
+}
+
 function getVisibleNavIds() {
   let sceneIds = [];
-  for (let nav of document.querySelectorAll('li.nav-item.scene')) {
-    sceneIds.push(nav.getAttribute('data-scene-id'));
+  for (let nav of getNavScenes()) {
+    sceneIds.push(getSceneId(nav));
   }
   logger('getVisibleNavIds found the following scenes', sceneIds);
   return sceneIds;
@@ -64,8 +73,8 @@ function alphaSortPresets(presets) {
 
 function generatePlayerIcons(preset) {
   let playerIconList = [];
-  for (let scene of document.querySelectorAll('li.scene.nav-item')) {
-    if (preset.sceneList.includes(scene.getAttribute('data-scene-id'))) {
+  for (let scene of getNavScenes()) {
+    if (preset.sceneList.includes(getSceneId(scene))) {
       let players = scene.querySelectorAll('.scene-players > .scene-player')
       if (players != null) {
         for (let player of players) {
@@ -81,8 +90,8 @@ function generatePlayerIcons(preset) {
 }
 
 function presetHasActiveScene(preset) {
-  for (let scene of document.querySelectorAll('li.scene.nav-item')) {
-    if (preset.sceneList.includes(scene.getAttribute('data-scene-id'))) {
+  for (let scene of getNavScenes()) {
+    if (preset.sceneList.includes(getSceneId(scene))) {
       if (scene.querySelector('i.fa-bullseye') != null) {
         return true;
       }
@@ -104,7 +113,7 @@ export class NavigationPreset {
     this.color = existing['colorText']
     this.scenes = existing['sceneList'];
     this.uid = existing['_id'];
-    this.active=existing['isActive'];
+    this.active = existing['isActive'];
   }
   get uid() {return this._id;}
   set uid(id) {this._id = id;}
@@ -121,10 +130,10 @@ export class NavigationPreset {
 async function initPresets() {
   let allPresets = Settings.getPresets();
   let sceneIds = getVisibleNavIds();
-  allPresets['default'] = {
+  allPresets[defaultPreset] = {
     'sceneList': sceneIds,
     'titleText': 'Default',
-    '_id': 'default',
+    '_id': defaultPreset,
     'colorText': '#000000',
     'isActive': true
   };
@@ -169,25 +178,25 @@ async function assignNewNavItemsToDefault(existingNavItems) {
     assigned = assigned.concat(preset.sceneList);
   }
   for (let navItem of existingNavItems) {
-    if (!assigned.includes(navItem.getAttribute('data-scene-id'))) {
-      unassigned.push(navItem.getAttribute('data-scene-id'));
+    if (!assigned.includes(getSceneId(navItem))) {
+      unassigned.push(getSceneId(navItem));
     }
   }
-  allPresets['default'].sceneList = allPresets['default'].sceneList.concat(unassigned);
+  allPresets[defaultPreset].sceneList = allPresets[defaultPreset].sceneList.concat(unassigned);
   if (game.ready)
-    await game.settings.set(modId,mainSettingKey,allPresets);
+    await game.settings.set(modId, mainSettingKey, allPresets);
   else
     Hooks.once('ready',async function() {
-      await game.settings.set(modId,mainSettingKey,allPresets);
+      await game.settings.set(modId, mainSettingKey, allPresets);
     });
 }
 
 async function filterNavItemsToActivePreset(activePreset) {
-  let existingNavItems = document.querySelectorAll('li.nav-item.scene');
+  let existingNavItems = getNavScenes();
   if (game.user.isGM)
     await assignNewNavItemsToDefault(existingNavItems);
   for (let navItem of existingNavItems) {
-    if (!activePreset.sceneList.includes(navItem.getAttribute('data-scene-id'))) {
+    if (!activePreset.sceneList.includes(getSceneId(navItem))) {
       navItem.style.display = 'none';
     }else{
       navItem.style.display = '';
@@ -202,37 +211,37 @@ function setupPresets() {
   clearExistingElements();
   let navbar = document.querySelector('ol#scene-list');
 
-  // Visible preset
+  // visible preset
   let dropdown = document.createElement('a');
   dropdown.classList.add('scene-presets');
   let caretIcon = document.createElement('i');
-  caretIcon.classList.add('fas','fa-caret-right');
+  caretIcon.classList.add('fas', 'fa-caret-right');
   dropdown.innerHTML = caretIcon.outerHTML + activePreset.titleText;
   dropdown.style.backgroundColor = activePreset.colorText
   dropdown.setAttribute(dataPresetId, activePreset._id);
 
-  // Other presets
+  // other presets
   let contextItems = document.createElement('ol');
-  contextItems.classList.add('context-items','flexrow');
+  contextItems.classList.add('context-items', 'flexrow');
   let presetMenu = document.createElement('nav');
   presetMenu.classList.add('expand-down');
-  presetMenu.id='navpresets-menu';
+  presetMenu.id = 'navpresets-menu';
   for (let preset of alphaSortPresets(allPresets)) {
-    if (preset._id === 'default' && preset.sceneList?.length === 0) continue;
-    if (preset._id != activePreset._id) {
+    if (preset._id === defaultPreset && preset.sceneList?.length === 0) continue;
+    if (preset._id !== activePreset._id) {
       let preset1 = document.createElement('li');
       preset1.classList.add('nav-preset');
       if (presetHasActiveScene(preset)) {
         let bullseye = document.createElement('i');
-        bullseye.classList.add('fas','fa-bullseye');
-        preset1.innerHTML=bullseye.outerHTML+preset.titleText;
+        bullseye.classList.add('fas', 'fa-bullseye');
+        preset1.innerHTML = bullseye.outerHTML+preset.titleText;
       } else {
-        preset1.innerHTML=preset.titleText;
+        preset1.innerHTML = preset.titleText;
       }
       preset1.style.backgroundColor = preset.colorText;
       preset1.setAttribute(dataPresetId, preset._id);
 
-      //Player icons
+      // player icons
       let playerIcons = generatePlayerIcons(preset);
       if (playerIcons.length > 0) {
         let playerList = document.createElement('ul');
@@ -251,14 +260,14 @@ function setupPresets() {
   navbar.insertAdjacentElement('afterbegin', dropdown);
   navbar.insertAdjacentElement('afterbegin', presetMenu);
 
-  //Create button
+  // create button
   if (game.user.isGM) {
     let createButton = document.createElement('a');
     createButton.classList.add('create-preset');
     createButton.title = 'Create Preset';
     createButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
     let createIcon = document.createElement('i');
-    createIcon.classList.add('fas','fa-plus');
+    createIcon.classList.add('fas', 'fa-plus');
 
     createButton.innerHTML = createIcon.outerHTML;
     navbar.insertAdjacentElement('afterbegin', createButton);
@@ -292,7 +301,7 @@ function createContextMenu(parent) {
 
   presetContextMenuList.appendChild(presetEditOption);
 
-  if (parent.getAttribute(dataPresetId) != 'default') {
+  if (parent.getAttribute(dataPresetId) !== defaultPreset) {
     let presetDeleteOption = document.createElement('li');
     presetDeleteOption.classList.add('context-item');
     let deleteIcon = document.createElement('i');
@@ -333,7 +342,6 @@ function createContextMenu(parent) {
 
   presetEditOption.addEventListener('click', function(ev) {
     ev.stopPropagation()
-    //showEditDialog(parent.getAttribute(dataPresetId));
     let newFolder = new NavigationPreset('Default', '');
     let preset = Settings.getPresets()[parent.getAttribute(dataPresetId)];
     newFolder.initFromExisting(preset);
@@ -355,7 +363,7 @@ function addEventListeners() {
   dropdown.addEventListener('click', function(ev) {
     ev.stopPropagation();
     let menu = document.querySelector('#navpresets-menu');
-    if (menu.style.display == 'none') {
+    if (menu.style.display === 'none') {
       let caretIcon = dropdown.querySelector('i.fa-caret-right');
       caretIcon.classList.add('fa-caret-down');
       caretIcon.classList.remove('fa-caret-right');
@@ -415,9 +423,10 @@ class NavigationPresetEditConfig extends FormApplication {
     let allPresets = game.settings.get(modId, mainSettingKey);
     let assigned = {};
     let unassigned = {};
+
     let visibleNavIcons = getVisibleNavIds();
     Object.keys(allPresets).forEach(function(key) {
-      if (key != 'default') {
+      if (key !== defaultPreset) {
         for (let a of allPresets[key].sceneList) {
           if (visibleNavIcons.includes(a)) {
             assigned[a] = game.scenes.get(a);
@@ -430,6 +439,10 @@ class NavigationPresetEditConfig extends FormApplication {
         unassigned[scene] = game.scenes.get(scene);
       }
     }
+    logger('getGroupedPacks found these scenes', {
+      assigned,
+      unassigned
+    });
     return {assigned, unassigned};
   }
 
@@ -438,36 +451,36 @@ class NavigationPresetEditConfig extends FormApplication {
     let allScenes = this.getGroupedPacks();
     return {
       preset: this.object,
-      defaultFolder: this.object._id === 'default',
+      defaultFolder: this.object._id === defaultPreset,
       ascenes: alphaSortScenes(Object.values(allScenes.assigned)),
-      uscenes: alphaSortScenes(Object.values(allScenes.unassigned)),
+      uscenes: alphaSortScenes(Object.values(allScenes.ungetassigned)),
       submitText: this.object.colorText.length > 1 ? 'Update Preset' : 'Create Preset',
-      deleteText: (this.object.colorText.length > 1 && this.object._id != 'default') ? 'Delete Preset' : null
+      deleteText: (this.object.colorText.length > 1 && this.object._id !== defaultPreset) ? 'Delete Preset' : null
     };
   }
 
   /** @override */
   async _updateObject(event, formData) {
     this.object.titleText = formData.name;
-    if (formData.color.length ===0) {
+    if (formData.color.length === 0) {
       this.object.colorText = '#000000';
     } else {
       this.object.colorText = formData.color;
     }
 
-    // Update scene assignment
+    // update scene assignment
     let scenesToAdd = [];
     let scenesToRemove = [];
     for (let sceneKey of game.scenes.keys()) {
       if (formData[sceneKey] && !this.object.sceneList.includes(sceneKey)) {
-        // Box ticked AND scene not in folder
+        // box ticked AND scene not in folder
         scenesToAdd.push(sceneKey);
       } else if (!formData[sceneKey] && this.object.sceneList.includes(sceneKey)) {
-        // Box unticked AND scene in folder
+        // box unticked AND scene in folder
         scenesToRemove.push(sceneKey);
       }
     }
-    if (formData.delete != null && formData.delete[0] == 1) {
+    if (formData.delete != null && formData.delete[0] === 1) {
       // do delete stuff
       new Dialog({
         title: 'Delete Preset',
@@ -508,7 +521,7 @@ async function updatePresets(scenesToAdd, scenesToRemove, preset) {
       if (allPresets[sId].sceneList.includes(sceneKey)) {
         allPresets[sId].sceneList.splice(allPresets[sId].sceneList.indexOf(sceneKey), 1);
         logger(`removing ${sceneKey} from preset ${allPresets[sId].titleText}`);
-        if (sId != 'hidden') {
+        if (sId !== 'hidden') {
           scenesMoved.push(sceneKey);
         }
       }
@@ -527,8 +540,8 @@ async function updatePresets(scenesToAdd, scenesToRemove, preset) {
   }
   for (let sceneKey of scenesToRemove) {
     allPresets[presetId].sceneList.splice(allPresets[presetId].sceneList.indexOf(sceneKey), 1);
-    allPresets['default'].sceneList.push(sceneKey);
-    logger(`adding ${sceneKey} to preset ${allPresets['default'].titleText}`);
+    allPresets[defaultPreset].sceneList.push(sceneKey);
+    logger(`adding ${sceneKey} to preset ${allPresets[defaultPreset].titleText}`);
   }
   allPresets[presetId].titleText = preset.titleText;
   allPresets[presetId].colorText = preset.colorText;
@@ -540,16 +553,13 @@ async function updatePresets(scenesToAdd, scenesToRemove, preset) {
 async function deletePreset(presetId) {
   let allPresets = Settings.getPresets();
   for (let scene of allPresets[presetId].sceneList) {
-    allPresets['default'].sceneList.push(scene);
+    allPresets[defaultPreset].sceneList.push(scene);
   }
   delete allPresets[presetId];
-  await game.settings.set(modId, mainSettingKey,allPresets);
+  await game.settings.set(modId, mainSettingKey, allPresets);
   refreshPresets();
 }
 
-//TODO scene import gui:
-// game.folders.entries.filter(function(e) {return e.type==='Scene'}) all scene folders
-// folder.entities = scenes
 export class Settings {
   static registerSettings() {
     game.settings.register(modId, mainSettingKey, {
@@ -591,8 +601,7 @@ export class Settings {
     } else {
       return Object.keys(allPresets).filter(
         x => allPresets[x].sceneList.some(
-          y => game.scenes.get(y)?.data.permission.default != 0
-          || game.scenes.get(y)?.active
+          y => game.scenes.get(y)?.data.permission.default !== 0 || game.scenes.get(y)?.active
         )
       ).reduce((obj, key) => {
         obj[key] = allPresets[key];
@@ -654,18 +663,18 @@ class SceneNavigationPresets extends SceneNavigation {
   }
 }
 
-Hooks.once('init',async function() {
-  Hooks.on('setup',async function() {
+Hooks.once('init', async function() {
+  Hooks.on('setup', async function() {
     CONFIG.ui.nav = SceneNavigationPresets;
   })
   Settings.registerSettings();
-  Hooks.on('renderSceneNavigation',function() {
+  Hooks.on('renderSceneNavigation', function() {
     Hooks.call('renderSceneNavigationPresets');
   })
   Hooks.on('renderSceneNavigationPresets', async function() {
     if (game.user.isGM || game.settings.get(modId, playerEnabledKey)) {
       if (Object.keys(Settings.getPresets()).length === 0) {
-        logger('no presets found, calling initPresets');
+        logger('no presets found, calling initPresets()');
         await initPresets();
       }
       logger('presets found', {
