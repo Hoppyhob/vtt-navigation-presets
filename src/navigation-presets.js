@@ -676,15 +676,19 @@ class SceneNavigationPresets extends SceneNavigation {
 }
 
 Hooks.once('init', async function() {
+  logger('hooks.once(init), fetching nav scenes:', {navScenes: getNavScenes()});
   Hooks.on('setup', async function() {
     CONFIG.ui.nav = SceneNavigationPresets;
   })
   Settings.registerSettings();
   Hooks.once('renderSceneNavigation', function() {
+    logger('hooks.once(renderSceneNavigation), fetching nav scenes:', {navScenes: getNavScenes()});
     Hooks.call('renderSceneNavigationPresets');
   })
   Hooks.once('renderSceneNavigationPresets', async function() {
     if (game.user.isGM || game.settings.get(modId, playerEnabledKey)) {
+
+      logger('hooks with enabled user, fetching navScenes:', {navScenes: getNavScenes()});
 
       if (game.settings.get(modId, currentNavIdsKey).length === 0) {
         logger('no currentNavIdsKey set, grabbing');
