@@ -681,7 +681,7 @@ Hooks.once('init', async function() {
     CONFIG.ui.nav = SceneNavigationPresets;
   })
   Settings.registerSettings();
-  Hooks.once('renderSceneNavigation', function() {
+  Hooks.once('collapseSceneNavigation', function() {
     logger('hooks.once(renderSceneNavigation), fetching nav scenes:', {navScenes: getNavScenes()});
     Hooks.call('renderSceneNavigationPresets');
   })
