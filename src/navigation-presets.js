@@ -688,11 +688,24 @@ Hooks.once('init', async function() {
   Hooks.once('renderSceneNavigationPresets', async function() {
     if (game.user.isGM || game.settings.get(modId, playerEnabledKey)) {
 
-      logger('hooks with enabled user, fetching navScenes:', {navScenes: getNavScenes()});
-
-      if (game.settings.get(modId, currentNavIdsKey).length === 0) {
-        logger('no currentNavIdsKey set, grabbing');
-        game.settings.set(modId, currentNavIdsKey, getVisibleNavIds())
+      if (game.ready) {
+        logger('hooks with enabled user, fetching navScenes:', { navScenes: getNavScenes() });
+        if (game.settings.get(modId, currentNavIdsKey).length === 0) {
+          logger('no currentNavIdsKey set, grabbing');
+          game.settings.set(modId, currentNavIdsKey, getVisibleNavIds())
+        } else {
+          logger('currentNavIdsKey already set', { currentNavIds: game.settings.get(modId, currentNavIdsKey) });
+        }
+      } else {
+        Hooks.once('ready', async function () {
+          logger('hooks with enabled user, fetching navScenes:', { navScenes: getNavScenes() });
+          if (game.settings.get(modId, currentNavIdsKey).length === 0) {
+            logger('no currentNavIdsKey set, grabbing');
+            game.settings.set(modId, currentNavIdsKey, getVisibleNavIds())
+          } else {
+            logger('currentNavIdsKey already set', { currentNavIds: game.settings.get(modId, currentNavIdsKey) });
+          }
+        });
       }
 
       if (Object.keys(Settings.getPresets()).length === 0) {
