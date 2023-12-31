@@ -1,7 +1,8 @@
 /* ----------------------------------------- */
 /*  Folders and Subfolders
 /* ----------------------------------------- */
-a.scene-presets,a.create-preset{
+a.scene-presets,
+a.create-preset {
   line-height: 32px;
   padding: 0 8px;
   margin: 0 8px 8px 0;
@@ -9,25 +10,31 @@ a.scene-presets,a.create-preset{
   border-radius: 3px;
   cursor: pointer;
   position: relative;
-  width:auto;
-  flex:0;
+  width: auto;
+  flex: 0;
   background: #000000;
-  float:left;
-  pointer-events:all;
+  float: left;
+  pointer-events: all;
 }
-a.scene-presets > .fa-caret-down,.fa-caret-right{
-  padding-right:5px;
+
+a.scene-presets>.fa-caret-down,
+.fa-caret-right {
+  padding-right: 5px;
 }
-a.scene-presets > .fa-caret-right{
-  padding-left:3.5px;
+
+a.scene-presets>.fa-caret-right {
+  padding-left: 3.5px;
 }
-a.scene-presets:hover{
-  text-shadow:0 0 black;
+
+a.scene-presets:hover {
+  text-shadow: 0 0 black;
 }
-a.scene-presets > nav > ol > li:hover{
+
+a.scene-presets>nav>ol>li:hover {
   text-shadow: 0 0 8px red;
 }
-#navpresets-menu{
+
+#navpresets-menu {
   height: max-content;
   min-width: 150px;
   position: absolute;
@@ -36,38 +43,47 @@ a.scene-presets > nav > ol > li:hover{
   color: #EEE;
   z-index: 31;
 }
-li.nav-preset{
-  list-style:none;
-  padding: 6px ;
+
+li.nav-preset {
+  list-style: none;
+  padding: 6px;
+  margin-top: 4px;
   margin-left: 2px;
-  margin-right:2px;
+  margin-right: 2px;
   line-height: 22px;
   background: rgba(0, 0, 0, 1);
-  border: 1px solid #000 ;
+  border: 1px solid #000;
   border-radius: 3px;
   cursor: pointer;
-  width:auto;
-  flex:none;
-  pointer-events:all;
+  width: auto;
+  flex: none;
+  pointer-events: all;
 }
-#navpresets-menu.expand-down{
+
+#navpresets-menu.expand-down {
   top: calc(100% - 8px);
+  position: relative;
 }
-#navpresets-menu .context-item{
+
+#navpresets-menu .context-item {
   list-style: none;
   margin: 0;
   padding: 2;
 }
-#navpresets-menu .context-item:hover{
+
+#navpresets-menu .context-item:hover {
   text-shadow: 0 0 8px red;
 }
-.nav-preset > #preset-context-menu{
-  margin-top:-7px
+
+.nav-preset>#preset-context-menu {
+  margin-top: -7px
 }
-#preset-context-menu.expand-down{
+
+#preset-context-menu.expand-down {
   top: calc(100% + 2px);
 }
-#preset-context-menu{
+
+#preset-context-menu {
   width: 32px;
   height: max-content;
   min-width: 150px;
@@ -80,66 +96,78 @@ li.nav-preset{
   color: #EEE;
   z-index: 32;
 }
-#preset-context-menu ol.context-items{
+
+#preset-context-menu ol.context-items {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-#preset-context-menu  li.context-item{
+
+#preset-context-menu li.context-item {
   padding: 0 5px;
   line-height: 32px;
 }
-#preset-context-menu li.context-item > i{
-  margin-right:5px;
+
+#preset-context-menu li.context-item>i {
+  margin-right: 5px;
 }
+
 /*Forms*/
-#preset-create input[name='search-scenes']{
+#preset-create input[name='search-scenes'] {
   width: calc(100% - 25px);
 }
-#preset-create i.fa-search{
-  padding-left:5px;
-  padding-right:5px;
+
+#preset-create i.fa-search {
+  padding-left: 5px;
+  padding-right: 5px;
 }
-#preset-create .form-header{
-  padding-top:4px;
-  padding-bottom:4px;
+
+#preset-create .form-header {
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
-#preset-create .form-scene-list{
-  height:300px; 
-  overflow:auto;
-  background:rgba(0,0,0,0.05);
-  border:1px solid #7a7971;
-  border-radius:3px;
-  padding:1px 3px;
-  font-size:13px;
+
+#preset-create .form-scene-list {
+  height: 300px;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid #7a7971;
+  border-radius: 3px;
+  padding: 1px 3px;
+  font-size: 13px;
 }
-a.scene-presets:hover{
-  color:#f0f0e0;
+
+a.scene-presets:hover {
+  color: #f0f0e0;
 }
-a.scene-presets > i.fa-bullseye{
-  padding-right:3px;
+
+a.scene-presets>i.fa-bullseye {
+  padding-right: 3px;
 }
-.nav-preset > i.fa-bullseye{
-  padding-right:3px;
+
+.nav-preset>i.fa-bullseye {
+  padding-right: 3px;
 }
-.nav-preset ul.scene-players{
+
+.nav-preset ul.scene-players {
   list-style: none;
   margin: 0;
   padding: 0;
   position: absolute;
-  margin-left:-5px;
+  margin-left: -5px;
 }
-.nav-preset li.scene-player{
+
+.nav-preset li.scene-player {
   float: left;
-    height: 14px;
-    width: 14px;
-    margin: 0 2px 0 0;
-    line-height: 12px;
-    font-size: 10px;
-    text-align: center;
-    color: #000;
-    font-weight: 700;
-    background: #97dff4;
-    border: 1px solid #000;
-    border-radius: 8px;
+  height: 14px;
+  width: 14px;
+  margin: 0 2px 0 0;
+  line-height: 12px;
+  font-size: 10px;
+  text-align: center;
+  color: #000;
+  font-weight: 700;
+  background: #97dff4;
+  border: 1px solid #000;
+  border-radius: 8px;
 }
