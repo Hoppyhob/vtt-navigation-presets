@@ -229,6 +229,7 @@ function setupPresets() {
   // other presets
   let contextItems = document.createElement('ol');
   contextItems.classList.add('context-items', 'flexrow');
+  contextItems.id = 'navpresets-menu';
   let presetMenu = document.createElement('nav');
   presetMenu.classList.add('expand-down');
   presetMenu.id = 'navpresets-menu';
@@ -459,7 +460,7 @@ class NavigationPresetEditConfig extends FormApplication {
       preset: this.object,
       defaultFolder: this.object._id === defaultPreset,
       ascenes: alphaSortScenes(Object.values(allScenes.assigned)),
-      uscenes: alphaSortScenes(Object.values(allScenes.ungetassigned)),
+      uscenes: alphaSortScenes(Object.values(allScenes.unassigned)),
       submitText: this.object.colorText.length > 1 ? 'Update Preset' : 'Create Preset',
       deleteText: (this.object.colorText.length > 1 && this.object._id !== defaultPreset) ? 'Delete Preset' : null
     };
@@ -651,20 +652,21 @@ class SceneNavigationPresets extends SceneNavigation {
     let truncateName = game.settings.get(modId, truncateNameKey);
     // modIdify Scene data
     const scenes = this.scenes.map(scene => {
-      let data = scene.data.toObject(false);
+      let data = game.version >= 10 ? scene : scene.toObject(false);
       let users = game.users.filter(u => u.active && (u.viewedScene === scene.id));
       if (!truncateName)
         data.name = data.navName || data.name;
       else
         data.name = TextEditor.truncateText(data.navName || data.name, {maxLength: 32});
       data.users = users.map(u => {
-        return {letter: u.name[0], color: u.data.color};
+        return {letter: u.name[0], color: u.color};
       });
-      data.visible = (game.user.isGM || scene.isOwner || scene.active);
+      //Removed as visible does not seem to be used and in V10+ there is a getter but not a setter.
+      //data.visible = (game.user.isGM || scene.isOwner || scene.active);
       data.css = [
         scene.isView ? 'view' : null,
         scene.active ? 'active' : null,
-        data.permission.default === 0 ? 'gm' : null
+        (game.version >= 10 ? data.ownership.default : data.permission.default) === 0 ? 'gm' : null
       ].filter(Boolean).join(' ');
         return data;
     });
@@ -681,11 +683,11 @@ Hooks.once('init', async function() {
     CONFIG.ui.nav = SceneNavigationPresets;
   })
   Settings.registerSettings();
-  Hooks.once('collapseSceneNavigation', function() {
+  Hooks.on('collapseSceneNavigation', function() {
     logger('hooks.once(renderSceneNavigation), fetching nav scenes:', {navScenes: getNavScenes()});
     Hooks.call('renderSceneNavigationPresets');
   })
-  Hooks.once('renderSceneNavigationPresets', async function() {
+  Hooks.on('renderSceneNavigationPresets', async function() {
     if (game.user.isGM || game.settings.get(modId, playerEnabledKey)) {
 
       if (game.ready) {
